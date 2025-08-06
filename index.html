@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Interactiva: Examen de Lenguaje USAC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: Se ha diseñado una SPA con una estructura de panel de control no lineal. La navegación principal fija permite el acceso a cuatro secciones clave: 'Inicio' (un centro de bienvenida), 'Estructura del Examen' (visualización de datos), 'Los 10 Errores' (exploración interactiva mediante tarjetas y modales), y 'Estrategias' (contenido colapsable). Se añade una sección de 'Práctica' para fomentar el aprendizaje activo. Esta estructura se eligió porque descompone un informe denso en fragmentos manejables, permitiendo al usuario dirigir su propio aprendizaje y centrarse en áreas de interés o debilidad, mejorando la usabilidad y la retención del conocimiento frente a una lectura lineal. -->
+    <!-- Visualization & Content Choices: 1. Estructura del Examen: Report Info -> Ponderación de áreas. Goal -> Informar sobre la importancia relativa. Viz -> Gráfico de Anillo (Chart.js/Canvas) para mostrar proporciones de forma intuitiva. Interaction -> Tooltips al pasar el ratón. Justification -> Más impactante y rápido de asimilar que el texto. 2. Los 10 Errores: Report Info -> Descripción detallada de cada error. Goal -> Organizar y explorar. Viz -> Rejilla de tarjetas con iconos (HTML/CSS/Unicode). Interaction -> Clic en tarjeta abre un modal con la información detallada. Justification -> Evita la sobrecarga de información, permitiendo una exploración enfocada (progressive disclosure). 3. Estrategias: Report Info -> Consejos de preparación. Goal -> Organizar texto denso. Viz -> Acordeón (HTML/JS). Interaction -> Clic para expandir/colapsar. Justification -> Compacta la información y mejora la legibilidad. 4. Práctica: Report Info -> Ejemplos de errores. Goal -> Aplicar conocimiento. Viz -> Cuestionario interactivo (HTML/JS). Interaction -> Selección de respuesta con feedback inmediato. Justification -> Fomenta el aprendizaje activo y la autoevaluación. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #D97706; 
+            border-bottom-color: #D97706;
+        }
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .card-hover {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-gray-800">
+                Guía USAC <span class="text-amber-600">Lenguaje</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#inicio" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Inicio</a>
+                <a href="#estructura" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Estructura</a>
+                <a href="#errores" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Los 10 Errores</a>
+                <a href="#estrategias" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Estrategias</a>
+                <a href="#practica" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Práctica</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#inicio" class="block py-2 px-6 text-sm text-gray-700 hover:bg-amber-50">Inicio</a>
+            <a href="#estructura" class="block py-2 px-6 text-sm text-gray-700 hover:bg-amber-50">Estructura</a>
+            <a href="#errores" class="block py-2 px-6 text-sm text-gray-700 hover:bg-amber-50">Los 10 Errores</a>
+            <a href="#estrategias" class="block py-2 px-6 text-sm text-gray-700 hover:bg-amber-50">Estrategias</a>
+            <a href="#practica" class="block py-2 px-6 text-sm text-gray-700 hover:bg-amber-50">Práctica</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="inicio" class="py-20 bg-amber-50">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Domina el Examen de Lenguaje de la USAC</h1>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                    Bienvenido a tu guía interactiva para el examen de admisión. Hemos transformado el denso temario en una herramienta de estudio ágil y efectiva. Explora los errores más comunes, entiende la estructura de la prueba y fortalece tus habilidades con estrategias y práctica. ¡Tu camino al éxito empieza aquí!
+                </p>
+                <a href="#errores" class="mt-8 inline-block bg-amber-600 text-white font-bold py-3 px-8 rounded-full hover:bg-amber-700 transition-colors">Empezar a Explorar</a>
+            </div>
+        </section>
+
+        <section id="estructura" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Estructura del Examen y su Ponderación</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                    El examen de Lenguaje evalúa seis áreas principales, pero no todas tienen el mismo peso. Como puedes ver en el gráfico, tres de ellas son cruciales para tu puntuación final. Pasa el cursor sobre cada sección para ver más detalles y enfoca tu estudio de manera inteligente.
+                </p>
+                <div class="chart-container">
+                    <canvas id="examChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="errores" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Los 10 Errores Más Comunes</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                    Estos son los diez obstáculos más frecuentes que encuentran los aspirantes. Haz clic en cada tarjeta para desglosar el error, ver ejemplos claros, entender el porqué y aprender a evitarlo.
+                </p>
+                <div id="error-grid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+                </div>
+            </div>
+        </section>
+
+        <section id="estrategias" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Estrategias para el Éxito</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                    Más allá de evitar errores, una preparación integral es clave. Aquí tienes estrategias fundamentales para afrontar el examen con confianza. Haz clic en cada título para expandir la información.
+                </p>
+                <div id="strategy-accordion" class="max-w-3xl mx-auto">
+                </div>
+            </div>
+        </section>
+
+        <section id="practica" class="py-20 bg-amber-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Pon a Prueba tus Conocimientos</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                    La mejor forma de aprender es aplicando. Responde estas preguntas basadas en los errores comunes y recibe retroalimentación al instante. ¿Estás listo?
+                </p>
+                <div id="quiz-container" class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+                    <div id="quiz-question" class="text-lg font-medium mb-6"></div>
+                    <div id="quiz-options" class="space-y-4"></div>
+                    <div id="quiz-feedback" class="mt-6 text-sm"></div>
+                    <div class="flex justify-between items-center mt-6">
+                        <div id="quiz-score" class="font-bold text-gray-700">Puntuación: 0/0</div>
+                        <button id="next-question-btn" class="bg-amber-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-amber-700 transition-colors disabled:bg-gray-300">Siguiente</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 Guía Interactiva para el Examen de Lenguaje USAC. Creada para facilitar tu ingreso.</p>
+            <p class="text-sm text-gray-400 mt-2">Este es un recurso de estudio no oficial, basado en las guías temáticas públicas.</p>
+        </div>
+    </footer>
+
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div id="modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 md:p-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-800"></h3>
+                <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="modal-body" class="prose max-w-none">
+            </div>
+        </div>
+    </div>
+
+<script>
+const data = {
+    errors: [
+        {
+            id: 1,
+            title: "Queísmo y Dequeísmo",
+            icon: "❓",
+            content: `
+                <p class="lead">Consiste en el uso o la omisión incorrecta de la preposición <strong>"de"</strong> antes de la conjunción <strong>"que"</strong>.</p>
+                <h4 class="font-bold mt-4">Queísmo (Omitir "de")</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> Estoy seguro que aprobaré.</li>
+                    <li><strong>Correcto:</strong> Estoy seguro <strong>de</strong> que aprobaré.</li>
+                    <li><strong>Incorrecto:</strong> Me di cuenta que era tarde.</li>
+                    <li><strong>Correcto:</strong> Me di cuenta <strong>de</strong> que era tarde.</li>
+                </ul>
+                <h4 class="font-bold mt-4">Dequeísmo (Añadir "de")</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> Pienso de que es una buena idea.</li>
+                    <li><strong>Correcto:</strong> Pienso que es una buena idea.</li>
+                    <li><strong>Incorrecto:</strong> Me alegra de que hayas venido.</li>
+                    <li><strong>Correcto:</strong> Me alegra que hayas venido.</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>La clave está en la regencia del verbo. Un truco es sustituir la oración subordinada por "eso" o "de eso". Si encaja "de eso", necesitas la preposición. Si encaja "eso", no la necesitas. Ejemplo: "Estoy seguro (de eso)" vs. "Pienso (eso)".</p>
+            `
+        },
+        {
+            id: 2,
+            title: "Errores de Concordancia",
+            icon: "⚖️",
+            content: `
+                <p class="lead">Falta de armonía en género y número entre sujeto-verbo o sustantivo-adjetivo.</p>
+                <h4 class="font-bold mt-4">Sustantivo - Adjetivo</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> El agua está frío.</li>
+                    <li><strong>Correcto:</strong> El agua está <strong>fría</strong>. (Agua es femenino).</li>
+                    <li><strong>Incorrecto:</strong> Compré una camisa y un pantalón nuevos.</li>
+                    <li><strong>Correcto:</strong> Compré una camisa y un pantalón <strong>nuevos</strong>. (Predomina el masculino plural).</li>
+                </ul>
+                <h4 class="font-bold mt-4">Sujeto - Verbo</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> La gente piensan que es fácil.</li>
+                    <li><strong>Correcto:</strong> La gente <strong>piensa</strong> que es fácil. (Gente es singular).</li>
+                    <li><strong>Incorrecto:</strong> Habían muchos problemas.</li>
+                    <li><strong>Correcto:</strong> <strong>Había</strong> muchos problemas. (Verbo 'haber' impersonal es siempre singular).</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>Siempre identifica el sujeto de la oración antes de conjugar el verbo. Presta atención a los sustantivos colectivos (gente, rebaño) que van en singular y al uso impersonal del verbo 'haber'. Para los adjetivos, verifica siempre el género y número del sustantivo que modifican.</p>
+            `
+        },
+        {
+            id: 3,
+            title: "Uso de Preposiciones",
+            icon: "🧭",
+            content: `
+                <p class="lead">Uso incorrecto de preposiciones, alterando el significado o la corrección gramatical.</p>
+                <h4 class="font-bold mt-4">Ejemplos Comunes</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> De acuerdo a lo que dijiste...</li>
+                    <li><strong>Correcto:</strong> De acuerdo <strong>con</strong> lo que dijiste...</li>
+                    <li><strong>Incorrecto:</strong> Actuaron en base a las órdenes.</li>
+                    <li><strong>Correcto:</strong> Actuaron <strong>con base en</strong> las órdenes.</li>
+                    <li><strong>Incorrecto:</strong> Voy a confiar de que lo harás.</li>
+                    <li><strong>Correcto:</strong> Voy a confiar <strong>en</strong> que lo harás.</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>Muchos verbos exigen una preposición específica (régimen verbal). Además, existen locuciones preposicionales fijas. La mejor estrategia es memorizar las construcciones más comunes y leer textos formales para internalizar su uso correcto.</p>
+            `
+        },
+        {
+            id: 4,
+            title: "Uso de Conjunciones",
+            icon: "🔗",
+            content: `
+                <p class="lead">Confusión en el uso de conjunciones, especialmente las que suenan parecido.</p>
+                <h4 class="font-bold mt-4">Porque / Por qué / Porqué / Por que</h4>
+                <ul>
+                    <li><strong>Porque (causa):</strong> No fui <strong>porque</strong> estaba enfermo.</li>
+                    <li><strong>Por qué (pregunta):</strong> ¿<strong>Por qué</strong> no viniste? / No sé <strong>por qué</strong> no vino.</li>
+                    <li><strong>Porqué (sustantivo 'motivo'):</strong> No entiendo el <strong>porqué</strong> de su decisión.</li>
+                </ul>
+                <h4 class="font-bold mt-4">Y/E, O/U</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> Padre y hijo / Aguja y hilo.</li>
+                    <li><strong>Correcto:</strong> Padre <strong>e</strong> hijo / Aguja <strong>e</strong> hilo. (Se usa 'e' ante palabras que empiezan con sonido /i/).</li>
+                    <li><strong>Incorrecto:</strong> Siete o ocho.</li>
+                    <li><strong>Correcto:</strong> Siete <strong>u</strong> ocho. (Se usa 'u' ante palabras que empiezan con sonido /o/).</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>Estas reglas son estrictas. Para 'porque' y sus variantes, analiza la función en la oración. Para 'y/e' y 'o/u', la regla es fonética, basada en el sonido de la siguiente palabra, no en su escritura.</p>
+            `
+        },
+        {
+            id: 5,
+            title: "Vicios de Dicción",
+            icon: "🗣️",
+            content: `
+                <p class="lead">Errores en el uso del lenguaje que afectan la pureza y propiedad de las palabras.</p>
+                <h4 class="font-bold mt-4">Barbarismos y Vulgarismos</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> "peliar", "haiga", "abujero", "vistes".</li>
+                    <li><strong>Correcto:</strong> "<strong>pelear</strong>", "<strong>haya</strong>", "<strong>agujero</strong>", "<strong>viste</strong>".</li>
+                </ul>
+                <h4 class="font-bold mt-4">Extranjerismos Innecesarios</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> El evento fue un "sold out".</li>
+                    <li><strong>Correcto:</strong> Se <strong>agotaron las entradas</strong> para el evento.</li>
+                    <li><strong>Incorrecto:</strong> Necesito tu "feedback".</li>
+                    <li><strong>Correcto:</strong> Necesito tu <strong>opinión/retroalimentación</strong>.</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>Estos errores son comunes en el habla coloquial pero inaceptables en un registro formal. Amplía tu vocabulario leyendo y consulta el diccionario ante la duda. Diferencia siempre entre el lenguaje informal y el académico.</p>
+            `
+        },
+        {
+            id: 6,
+            title: "Errores de Acentuación",
+            icon: "✍️",
+            content: `
+                <p class="lead">Colocación incorrecta de la tilde, incluyendo la tilde diacrítica.</p>
+                <h4 class="font-bold mt-4">Reglas Generales</h4>
+                <ul>
+                    <li><strong>Agudas:</strong> Llevan tilde si terminan en -n, -s o vocal (ca<strong>fé</strong>, can<strong>ción</strong>).</li>
+                    <li><strong>Graves:</strong> Llevan tilde si NO terminan en -n, -s o vocal (<strong>ár</strong>bol, <strong>fá</strong>cil).</li>
+                    <li><strong>Esdrújulas/Sobresdrújulas:</strong> Siempre llevan tilde (<strong>mé</strong>dico, explí<strong>ca</strong>melo).</li>
+                </ul>
+                <h4 class="font-bold mt-4">Tilde Diacrítica</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> El me dijo que tu no vendrías.</li>
+                    <li><strong>Correcto:</strong> <strong>Él</strong> me dijo que <strong>tú</strong> no vendrías.</li>
+                    <li><strong>Incorrecto:</strong> Te de mas te.</li>
+                    <li><strong>Correcto:</strong> Que te <strong>dé</strong> <strong>más</strong> <strong>té</strong>.</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>La acentuación es sistemática. Memoriza las reglas generales y la lista de monosílabos con tilde diacrítica. La práctica constante es la única forma de dominarla. Presta especial atención a los hiatos como 'd<strong>í</strong>a' o 'ba<strong>ú</strong>l', que siempre llevan tilde en la vocal cerrada.</p>
+            `
+        },
+        {
+            id: 7,
+            title: "Homónimos y Parónimos",
+            icon: "👯",
+            content: `
+                <p class="lead">Confusión entre palabras que suenan o se escriben de forma similar pero tienen significados distintos.</p>
+                <h4 class="font-bold mt-4">Homófonas (suenan igual, se escriben diferente)</h4>
+                <ul>
+                    <li><strong>Vaya</strong> (verbo ir) / <strong>Valla</strong> (cerca) / <strong>Baya</strong> (fruto).</li>
+                    <li><strong>Haya</strong> (verbo haber) / <strong>Halla</strong> (verbo encontrar) / <strong>Aya</strong> (niñera).</li>
+                </ul>
+                <h4 class="font-bold mt-4">Parónimas (suenan parecido)</h4>
+                <ul>
+                    <li><strong>Actitud</strong> (disposición) vs. <strong>Aptitud</strong> (capacidad).</li>
+                    <li><strong>Infligir</strong> (causar daño) vs. <strong>Infringir</strong> (quebrantar una ley).</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>El contexto es el rey. Presta atención a la oración completa para deducir el significado correcto. Crear tus propias oraciones con estos pares de palabras es un excelente ejercicio para fijar sus diferencias.</p>
+            `
+        },
+        {
+            id: 8,
+            title: "Muletillas y Frases Hechas",
+            icon: "💬",
+            content: `
+                <p class="lead">Uso de palabras o expresiones repetitivas que no aportan significado y restan formalidad.</p>
+                <h4 class="font-bold mt-4">Ejemplos Comunes</h4>
+                <ul>
+                    <li><strong>Incorrecto:</strong> Lo que es el problema, es muy complejo.</li>
+                    <li><strong>Correcto:</strong> El problema es muy complejo.</li>
+                    <li><strong>Incorrecto:</strong> Entregué el informe y el mismo fue aprobado.</li>
+                    <li><strong>Correcto:</strong> Entregué el informe y <strong>este</strong> fue aprobado / ..., <strong>el cual</strong> fue aprobado.</li>
+                    <li><strong>Incorrecto:</strong> La llave está adentro del cajón.</li>
+                    <li><strong>Correcto:</strong> La llave está <strong>dentro</strong> del cajón.</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>Sé consciente de tu propia forma de escribir y hablar. Revisa tus textos buscando palabras innecesarias. Sustituye las muletillas por conectores más precisos ("o sea" por "es decir", "en otras palabras"). La RAE desaconseja el uso de "el mismo/la misma" como pronombre.</p>
+            `
+        },
+        {
+            id: 9,
+            title: "Idea Principal vs. Secundaria",
+            icon: "🎯",
+            content: `
+                <p class="lead">Dificultad para discernir la información esencial (idea principal) de los detalles de apoyo (ideas secundarias).</p>
+                <h4 class="font-bold mt-4">Cómo Identificarlas</h4>
+                <ul>
+                    <li><strong>Idea Principal:</strong> Es la afirmación central del párrafo, la que resume el mensaje del autor. A menudo se encuentra al principio o al final. Pregúntate: ¿De qué trata fundamentalmente este párrafo?</li>
+                    <li><strong>Ideas Secundarias:</strong> Son las que explican, ejemplifican o argumentan la idea principal. Proporcionan detalles, datos o ejemplos.</li>
+                </ul>
+                <h4 class="font-bold mt-4">Ejemplo</h4>
+                <p>Texto: "La fotosíntesis es un proceso vital para la vida en la Tierra. A través de ella, las plantas convierten la luz solar en energía química. Este proceso libera el oxígeno que respiramos."</p>
+                <ul>
+                    <li><strong>Idea Principal:</strong> La fotosíntesis es un proceso vital para la vida en la Tierra.</li>
+                    <li><strong>Ideas Secundarias:</strong> Explican cómo lo hace (convierte luz en energía) y por qué es vital (libera oxígeno).</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>Practica la lectura activa: subraya lo que consideres más importante. Después de leer un párrafo, intenta resumirlo en una sola frase con tus propias palabras. Esa frase debería ser la idea principal.</p>
+            `
+        },
+        {
+            id: 10,
+            title: "Hechos vs. Opiniones",
+            icon: "📊",
+            content: `
+                <p class="lead">Incapacidad para distinguir entre afirmaciones objetivas y verificables (hechos) y juicios subjetivos (opiniones).</p>
+                <h4 class="font-bold mt-4">Definiciones Clave</h4>
+                <ul>
+                    <li><strong>Hecho:</strong> Una afirmación que puede ser probada como verdadera o falsa. Es objetiva.
+                        <ul><li><em>Ejemplo: "Guatemala es un país de Centroamérica."</em></li></ul>
+                    </li>
+                    <li><strong>Opinión:</strong> Un juicio, creencia o sentimiento que no puede ser probado. Es subjetiva.
+                        <ul><li><em>Ejemplo: "Guatemala es el país más bonito de Centroamérica."</em></li></ul>
+                    </li>
+                </ul>
+                <h4 class="font-bold mt-4">Pistas Lingüísticas</h4>
+                <ul>
+                    <li><strong>Hechos:</strong> Usan datos, fechas, estadísticas, lenguaje neutral.</li>
+                    <li><strong>Opiniones:</strong> Usan adjetivos valorativos (bonito, feo, mejor), verbos de creencia (creo, pienso), adverbios de juicio (probablemente).</li>
+                </ul>
+                <h4 class="font-bold mt-4">Análisis y Consejo</h4>
+                <p>Al leer, pregúntate: "¿Se puede verificar esta afirmación con datos?". Si la respuesta es sí, es un hecho. Si depende de la perspectiva o el gusto personal, es una opinión. Esta habilidad es clave para el pensamiento crítico.</p>
+            `
+        }
+    ],
+    strategies: [
+        {
+            title: "Uso de Guías Temáticas y Simuladores Oficiales",
+            content: "La USAC proporciona guías temáticas que son tu mapa de ruta exacto para el examen. Descárgalas y úsalas como tu principal fuente de estudio. Además, el Simulador de Pruebas de Conocimientos Básicos (PCB) es una herramienta invaluable. Te permite familiarizarte con el formato del examen, gestionar tu tiempo y recibir retroalimentación inmediata sobre tus áreas débiles."
+        },
+        {
+            title: "Importancia de la Lectura Constante y Variada",
+            content: "Leer es el mejor ejercicio para el cerebro lingüístico. Lee de todo: noticias, novelas, ensayos. Esto no solo amplía tu vocabulario y mejora tu ortografía de forma natural, sino que también agudiza tu capacidad para identificar ideas principales, diferenciar hechos de opiniones y entender estructuras textuales complejas. Un buen hábito de lectura es tu mejor aliado."
+        },
+        {
+            title: "Práctica de Redacción y Revisión de Textos",
+            content: "No basta con entender, también debes saber producir. Escribe regularmente párrafos o pequeños ensayos sobre los temas que estudias. Luego, sé tu propio editor: revisa tu trabajo buscando errores de concordancia, acentuación, vocabulario y sintaxis. Pedirle a un compañero que revise tus textos también es una excelente práctica para obtener una perspectiva externa."
+        },
+        {
+            title: "Gestión del Tiempo y Manejo del Estrés",
+            content: "El examen tiene un tiempo limitado. Practica con un cronómetro para acostumbrarte a la presión. Si una pregunta te bloquea, márcala y sigue adelante; podrás volver a ella más tarde. El estudio constante y disciplinado, en lugar de los atracones de última hora, es la mejor forma de reducir la ansiedad. Confía en tu preparación y mantén una actitud positiva."
+        }
+    ],
+    quiz: [
+        {
+            question: "Selecciona la oración correcta:",
+            options: ["Estoy seguro que lo lograré.", "Estoy seguro de que lo lograré."],
+            answer: 1,
+            explanation: "El adjetivo 'seguro' rige la preposición 'de'. Lo correcto es 'estar seguro DE algo'. Omitirla es un caso de queísmo."
+        },
+        {
+            question: "¿Cuál de estas oraciones tiene la concordancia correcta?",
+            options: ["Habían muchas personas en la fila.", "Había muchas personas en la fila."],
+            answer: 1,
+            explanation: "El verbo 'haber' usado de forma impersonal (con el significado de 'existir') es siempre singular. Por lo tanto, 'Había' es la forma correcta."
+        },
+        {
+            question: "Elige la opción con la acentuación correcta:",
+            options: ["Él te dió el libro para mí.", "Él te dio el libro para mí."],
+            answer: 1,
+            explanation: "Los monosílabos como 'dio' no llevan tilde según las reglas actuales de la RAE. 'Él' y 'mí' sí la llevan por ser pronombres personales (tilde diacrítica)."
+        },
+        {
+            question: "Identifica la frase que contiene una opinión:",
+            options: ["El volcán de Pacaya está en Guatemala.", "El volcán de Pacaya es el más impresionante."],
+            answer: 1,
+            explanation: "Que el volcán está en Guatemala es un hecho verificable. Que sea 'el más impresionante' es una valoración subjetiva, es decir, una opinión."
+        },
+        {
+            question: "Completa la frase: Compramos agujas ___ hilo.",
+            options: ["y", "e"],
+            answer: 1,
+            explanation: "Se utiliza la conjunción 'e' en lugar de 'y' cuando la palabra siguiente comienza con el sonido /i/ (como en 'hilo')."
+        },
+        {
+            question: "Selecciona la oración que utiliza la palabra correcta:",
+            options: ["No debes infringir la ley.", "No debes infligir la ley."],
+            answer: 0,
+            explanation: "'Infringir' significa quebrantar una norma, mientras que 'infligir' significa causar un daño. La opción correcta es 'infringir'."
+        }
+    ]
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const errorGrid = document.getElementById('error-grid');
+    const strategyAccordion = document.getElementById('strategy-accordion');
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modal-content');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+
+    data.errors.forEach(error => {
+        const card = document.createElement('div');
+        card.className = 'bg-white p-6 rounded-lg shadow-md cursor-pointer card-hover';
+        card.innerHTML = `
+            <div class="text-4xl mb-4">${error.icon}</div>
+            <h3 class="font-bold text-lg text-gray-800">${error.title}</h3>
+        `;
+        card.addEventListener('click', () => openModal(error));
+        errorGrid.appendChild(card);
+    });
+
+    data.strategies.forEach((strategy, index) => {
+        const item = document.createElement('div');
+        item.className = 'border-b border-gray-200';
+        item.innerHTML = `
+            <button class="w-full text-left py-4 px-2 flex justify-between items-center focus:outline-none">
+                <span class="font-medium text-gray-700">${strategy.title}</span>
+                <span class="transform transition-transform duration-300">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+            </button>
+            <div class="overflow-hidden max-h-0 transition-max-height duration-500 ease-in-out">
+                <p class="p-4 text-gray-600 bg-gray-50">${strategy.content}</p>
+            </div>
+        `;
+        const button = item.querySelector('button');
+        const content = item.querySelector('div');
+        const icon = button.querySelector('span.transform');
+
+        button.addEventListener('click', () => {
+            const isExpanded = content.style.maxHeight && content.style.maxHeight !== '0px';
+            if (isExpanded) {
+                content.style.maxHeight = '0px';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+        strategyAccordion.appendChild(item);
+    });
+
+    function openModal(error) {
+        modalTitle.textContent = error.title;
+        modalBody.innerHTML = error.content;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    const ctx = document.getElementById('examChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                'Comprensión Lectora', 
+                'Gramática y Vocabulario', 
+                'Exposición Oral y Escrita', 
+                'Ortografía', 
+                'Comunicación', 
+                'Lenguaje'
+            ],
+            datasets: [{
+                label: 'Ponderación en el Examen',
+                data: [30, 25, 20, 10, 10, 5],
+                backgroundColor: [
+                    '#D97706', 
+                    '#F59E0B', 
+                    '#FBBF24', 
+                    '#D1D5DB', 
+                    '#9CA3AF', 
+                    '#6B7280' 
+                ],
+                borderColor: '#FDFBF8',
+                borderWidth: 4,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 12
+                        },
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed !== null) {
+                                label += `~${context.parsed}% del punteo`;
+                            }
+                            return label;
+                        }
+                    },
+                    backgroundColor: '#4A4A4A',
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 5
+                },
+                title: {
+                    display: false
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    const quizQuestionEl = document.getElementById('quiz-question');
+    const quizOptionsEl = document.getElementById('quiz-options');
+    const quizFeedbackEl = document.getElementById('quiz-feedback');
+    const quizScoreEl = document.getElementById('quiz-score');
+    const nextQuestionBtn = document.getElementById('next-question-btn');
+    
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let questionsAnswered = 0;
+
+    function loadQuestion() {
+        if (currentQuestionIndex >= data.quiz.length) {
+            quizQuestionEl.textContent = "¡Has completado la práctica!";
+            quizOptionsEl.innerHTML = "";
+            quizFeedbackEl.innerHTML = `Tu puntuación final es <strong>${score} de ${data.quiz.length}</strong>. ¡Sigue practicando!`;
+            nextQuestionBtn.textContent = "Reiniciar";
+            nextQuestionBtn.onclick = () => {
+                currentQuestionIndex = 0;
+                score = 0;
+                questionsAnswered = 0;
+                updateScore();
+                loadQuestion();
+                nextQuestionBtn.textContent = "Siguiente";
+                nextQuestionBtn.onclick = loadNextQuestion;
+            };
+            return;
+        }
+
+        const question = data.quiz[currentQuestionIndex];
+        quizQuestionEl.textContent = question.question;
+        quizOptionsEl.innerHTML = "";
+        quizFeedbackEl.textContent = "";
+        nextQuestionBtn.disabled = true;
+
+        question.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = "block w-full text-left p-4 border border-gray-300 rounded-lg hover:bg-amber-50 transition-colors";
+            button.textContent = option;
+            button.onclick = () => checkAnswer(index, question.answer, question.explanation);
+            quizOptionsEl.appendChild(button);
+        });
+    }
+
+    function checkAnswer(selectedIndex, correctIndex, explanation) {
+        const buttons = quizOptionsEl.querySelectorAll('button');
+        buttons.forEach(button => button.disabled = true);
+        
+        questionsAnswered++;
+
+        if (selectedIndex === correctIndex) {
+            buttons[selectedIndex].classList.add('bg-green-100', 'border-green-500');
+            quizFeedbackEl.innerHTML = `<strong class="text-green-700">¡Correcto!</strong> ${explanation}`;
+            score++;
+        } else {
+            buttons[selectedIndex].classList.add('bg-red-100', 'border-red-500');
+            buttons[correctIndex].classList.add('bg-green-100', 'border-green-500');
+            quizFeedbackEl.innerHTML = `<strong class="text-red-700">Incorrecto.</strong> ${explanation}`;
+        }
+        updateScore();
+        nextQuestionBtn.disabled = false;
+    }
+
+    function updateScore() {
+        quizScoreEl.textContent = `Puntuación: ${score}/${questionsAnswered}`;
+    }
+
+    function loadNextQuestion() {
+        currentQuestionIndex++;
+        loadQuestion();
+    }
+
+    nextQuestionBtn.addEventListener('click', loadNextQuestion);
+    loadQuestion();
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            mobileMenu.classList.add('hidden');
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 90) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+});
+</script>
+</body>
+</html>
